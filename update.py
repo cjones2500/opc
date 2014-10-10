@@ -2,12 +2,15 @@ import couchdb
 import getpass
 import copy
 
-#his address has been ssh tunnelled 
-address = "http://localhost:8080"
-dbname = "resistor"
-username = "snotdaq"
-new_field = "run_range"
-new_value = [0,-1]
+ 
+address = "http://localhost:8080" #network address of the database
+#This address has been ssh tunnelled from port 5984 to port 8080.
+#This is only a temporary measure due the SNO+ VPN at SNOLAB
+#CouchDb operates from port 5984 
+dbname = "resistor"    #name of the couchdb database
+username = "snotdaq"   #username for access to the couchdb database
+new_field = "run_range"  #new field to add update
+new_value = [0,-1]       #new value to add in the new field   
 
 # Retrieve database from couch
 couch = couchdb.Server(address)
@@ -22,22 +25,13 @@ rows = database.view("_all_docs", include_docs=True)
 docs = [] # for a bulk update at the end
 
 for row in rows:
-    #print row
     # Might want to filter on e.g. id to ensure no design docs are included
     if row.id.startswith("_design"):
         print "skip", row.id
         continue
     doc = copy.copy(row.doc)
-    #print doc
     doc[new_field] = new_value
     docs.append(row.doc)
-    #print doc
-    database[doc.id] = doc
-    #print "recorded version \n\n\n"
-    #print database[doc.id]
-    raw_input("enter to continue")
-    
-
-#database.update(docs)
+    database[doc.id] = doc    
 
 print "Done!"
